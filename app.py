@@ -46,7 +46,7 @@ if __name__ == "__main__":
     print("==================================================")
     
     # We ask a question related to your Confluence PDF
-    query = "What is Emotional AI and how does it affect user experience?"
+    query = "1. What are the two main components of the Transformer architecture?"
     print(f"Question: '{query}'\n")
     
     # k=2 means "Bring me the top 2 chunks that best answer this question"
