@@ -3,7 +3,7 @@ import logging
 import os
 
 # ---------------------------------------------------------
-# 🛑 SUPPRESS MESSY LOGS & WARNINGS 🛑
+# 🛑 SUPPRESS LOGS & WARNINGS 🛑
 # ---------------------------------------------------------
 warnings.filterwarnings("ignore")  # Ignores Pydantic and Deprecation warnings
 logging.getLogger("pdfminer").setLevel(logging.ERROR)  # Silences the PDF FontBBox spam
@@ -29,11 +29,14 @@ def chunk_documents(documents):
     print("✂️  Splitting documents into bite-sized chunks...")
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200, length_function=len)
     chunks = text_splitter.split_documents(documents)
+    # 👇 ADDED THIS LINE to show exactly how many chunks were created
+    print(f"✅ Sliced the original text into {len(chunks)} chunks!") 
     return chunks
 
 def create_vector_database(chunks):
     print("🧠 Loading the offline Math Engine (Embeddings)...")
-    embeddings = HuggingFaceEmbeddings(model_name="./local_minilm_model")
+    # Note: ensure show_progress=False is used if you want to hide the loading bar here
+    embeddings = HuggingFaceEmbeddings(model_name="./local_minilm_model", show_progress=False)
     
     print("💾 Building the FAISS Vector Database...")
     vectorstore = FAISS.from_documents(chunks, embeddings)
@@ -45,7 +48,7 @@ def format_docs(docs):
 
 if __name__ == "__main__":
     print("\n" + "="*60)
-    print("🚀 INITIALIZING SECURE ENTERPRISE RAG PIPELINE")
+    print("🚀 INITIALIZING RAG PIPELINE")
     print("="*60 + "\n")
 
     # 1. Build the Database
@@ -79,15 +82,24 @@ if __name__ == "__main__":
         | StrOutputParser()
     )
     
-    # 4. Execute Chat
+    # 4. Execute Chat (FIXED LOOP)
     print("="*60)
-    query = "What are the two main components of the Transformer architecture?"
-    print(f"🗣️  USER: {query}")
+    print("💬 CHAT INTERFACE READY. TYPE 'quit' TO CLOSE.")
     print("="*60)
     
-    print("\n🤖 AI is reading the documents and thinking...\n")
-    response = rag_chain.invoke(query)
-    
-    print("✨ FINAL ANSWER ✨")
-    print(response)
-    print("\n" + "="*60)
+    while True:
+        query = input("\nEnter your query here: ")
+        
+        if query.lower() == "quit":
+            print("\n👋 Shutting down local AI. Goodbye!")
+            break
+
+        print(f"\n🗣️  USER: {query}")
+        print("="*60)
+        
+        print("\n🤖 AI is reading the documents and thinking...\n")
+        response = rag_chain.invoke(query)
+        
+        print("✨ FINAL ANSWER ✨")
+        print(response)
+        print("\n" + "="*60)
